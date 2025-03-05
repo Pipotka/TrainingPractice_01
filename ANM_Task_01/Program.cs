@@ -45,6 +45,7 @@ namespace ANM_Task_01
 					}
 				}
 			} while (crystalCount <= 0 || wallet < _crystalPrice * crystalCount);
+
 			wallet -= _crystalPrice * crystalCount;
 			Console.WriteLine($"Ваш кошель опустел. Посчитав монеты вы увидели {wallet} монет, однако теперь в ваших карманах {crystalCount} кристалов");
 
