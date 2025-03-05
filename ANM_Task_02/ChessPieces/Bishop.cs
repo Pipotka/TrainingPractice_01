@@ -11,12 +11,12 @@ namespace ANM_Task_02.ChessPieces
 
 		string IChessPiece.GetName() => "Слон";
 
-		Queue<ChessPosition> IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
+        List<ChessPosition> IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
 		{
 			throw new System.NotImplementedException();
 		}
 
-		List<ChessPosition> IChessPiece.TakeTheNextStep(ChessPosition chessPiecePosition)
+		List<ChessPosition> IChessPiece.GetSteps(ChessPosition chessPiecePosition)
 		{
 			throw new System.NotImplementedException();
 		}
