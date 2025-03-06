@@ -7,18 +7,53 @@ namespace ANM_Task_02.ChessPieces
 	/// </summary>
 	internal class King : IChessPiece
 	{
-		public ChessPosition Position { get; set; }
+        public const int Number = 1002;
 
-        List<ChessPosition> IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
+        public ChessPosition Position { get; set; }
+
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
 		{
-			throw new System.NotImplementedException();
-		}
+            var result = new Queue<ChessPosition>();
+
+            // Поля сверху
+            for (int col = chessPiecePosition.Column - 1,
+                row = chessPiecePosition.Row - 1;
+                col >= 0 && col < 8 && row >= 0; col++)
+            {
+                result.Enqueue(new ChessPosition
+                {
+                    Column = col,
+                    Row = row,
+                });
+            }
+
+            // Поля снизу не закончено
+            for (int col = chessPiecePosition.Column + 1,
+                row = chessPiecePosition.Row + 1;
+                col >= 0 && col < 8 && row < 8; col--)
+            {
+                result.Enqueue(new ChessPosition
+                {
+                    Column = col,
+                    Row = row,
+                });
+            }
+
+            // Поля справа
+            for (int col = chessPiecePosition.Column + 1,
+                row = chessPiecePosition.Row + 1;
+                col >= 0 && col < 8 && row < 8; col--)
+            {
+                result.Enqueue(new ChessPosition
+                {
+                    Column = col,
+                    Row = row,
+                });
+            }
+
+            return result.ToArray();
+        }
 
 		string IChessPiece.GetName() => "Король";
-
-		List<ChessPosition> IChessPiece.GetSteps(ChessPosition chessPiecePosition)
-		{
-			throw new System.NotImplementedException();
-		}
 	}
 }

@@ -9,18 +9,11 @@ namespace ANM_Task_02
 		/// </summary>
 		ChessPosition Position { get; set; }
 
-		/// <summary>
-		/// Возвращает позиции, на которые фигура может пойти
-		/// </summary>
-		/// <param name="position">позиция фигуры</param>
-		List<ChessPosition> GetSteps(ChessPosition position);
-
         /// <summary>
         /// Возвращает позиции, которые фигура может атаковать
         /// </summary>
-        /// <param name="chessPiecePosition"></param>
-        /// <returns></returns>
-        List<ChessPosition> GetAttackedPositions(ChessPosition chessPiecePosition);
+        /// <param name="position">позиция фигуры</param>
+        ChessPosition[] GetAttackedPositions(ChessPosition position);
 
 		/// <summary>
 		/// Возвращает название фигуры

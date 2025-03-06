@@ -7,16 +7,13 @@ namespace ANM_Task_02.ChessPieces
 	/// </summary>
 	internal class Queen : IChessPiece
 	{
-		public ChessPosition Position { get; set; }
+        public const int Number = 1004;
+
+        public ChessPosition Position { get; set; }
 
 		string IChessPiece.GetName() => "Ферзь";
 
-        List<ChessPosition> IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		List<ChessPosition> IChessPiece.GetSteps(ChessPosition chessPiecePosition)
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
 		{
 			throw new System.NotImplementedException();
 		}

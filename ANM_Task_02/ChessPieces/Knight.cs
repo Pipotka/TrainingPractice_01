@@ -7,16 +7,13 @@ namespace ANM_Task_02.ChessPieces
 	/// </summary>
 	internal class Knight : IChessPiece
 	{
-		public ChessPosition Position { get; set; }
+        public const int Number = 1003;
+
+        public ChessPosition Position { get; set; }
 
 		string IChessPiece.GetName() => "Конь";
 
-        List<ChessPosition> IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		List<ChessPosition> IChessPiece.GetSteps(ChessPosition chessPiecePosition)
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
 		{
 			throw new System.NotImplementedException();
 		}

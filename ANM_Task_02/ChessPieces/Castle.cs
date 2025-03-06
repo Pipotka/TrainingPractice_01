@@ -7,18 +7,43 @@ namespace ANM_Task_02.ChessPieces
 	/// </summary>
 	internal class Castle : IChessPiece
 	{
-		public ChessPosition Position { get; set; }
+        public const int Number = 1001;
 
-        List<ChessPosition> IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
-		{
-			throw new System.NotImplementedException();
-		}
+        public ChessPosition Position { get; set; }
 
 		string IChessPiece.GetName() => "Ладья";
 
-		List<ChessPosition> IChessPiece.GetSteps(ChessPosition chessPiecePosition)
-		{
-			throw new System.NotImplementedException();
-		}
-	}
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
+        {
+            var result = new Queue<ChessPosition>();
+
+            // Поля по горизонтали
+            for (var col = 0; col < 8; col++)
+            {
+                if (col != chessPiecePosition.Column)
+                {
+                    result.Enqueue(new ChessPosition
+                    {
+                        Column = col,
+                        Row = chessPiecePosition.Row
+                    });
+                }
+            }
+
+            // Поля по вертикали
+            for (var row = 0; row < 8; row++)
+            {
+                if (row != chessPiecePosition.Row)
+                {
+                    result.Enqueue(new ChessPosition
+                    {
+                        Column = chessPiecePosition.Column,
+                        Row = row
+                    });
+                }
+            }
+
+            return result.ToArray();
+        }
+    }
 }
