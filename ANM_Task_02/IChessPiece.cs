@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace ANM_Task_02
+﻿namespace ANM_Task_02
 {
+	/// <summary>
+	/// Интерфейс шахматной фигуры
+	/// </summary>
 	internal interface IChessPiece
 	{
 		/// <summary>
@@ -13,7 +14,7 @@ namespace ANM_Task_02
         /// Возвращает позиции, которые фигура может атаковать
         /// </summary>
         /// <param name="position">позиция фигуры</param>
-        ChessPosition[] GetAttackedPositions(ChessPosition position);
+        ChessPosition[] GetAttackedPositions(ChessPosition position, int[,] chessboard);
 
 		/// <summary>
 		/// Возвращает название фигуры

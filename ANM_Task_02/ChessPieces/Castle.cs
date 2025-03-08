@@ -13,13 +13,15 @@ namespace ANM_Task_02.ChessPieces
 
 		string IChessPiece.GetName() => "Ладья";
 
-        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition, int[,] chessboard)
         {
             var result = new Queue<ChessPosition>();
 
             // Поля по горизонтали
             for (var col = 0; col < 8; col++)
             {
+
+
                 if (col != chessPiecePosition.Column)
                 {
                     result.Enqueue(new ChessPosition

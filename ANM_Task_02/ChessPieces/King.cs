@@ -11,48 +11,36 @@ namespace ANM_Task_02.ChessPieces
 
         public ChessPosition Position { get; set; }
 
-        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition, int[,] chessboard)
 		{
             var result = new Queue<ChessPosition>();
 
-            // Поля сверху
-            for (int col = chessPiecePosition.Column - 1,
-                row = chessPiecePosition.Row - 1;
-                col >= 0 && col < 8 && row >= 0; col++)
-            {
-                result.Enqueue(new ChessPosition
-                {
-                    Column = col,
-                    Row = row,
-                });
-            }
+			// Перебираем все возможные направления движения короля
+			for (int rowDelta = -1; rowDelta <= 1; rowDelta++)
+			{
+				for (int colDelta = -1; colDelta <= 1; colDelta++)
+				{
+					// Пропускаем текущую позицию (нулевое смещение)
+					if (rowDelta == 0 && colDelta == 0)
+						continue;
 
-            // Поля снизу не закончено
-            for (int col = chessPiecePosition.Column + 1,
-                row = chessPiecePosition.Row + 1;
-                col >= 0 && col < 8 && row < 8; col--)
-            {
-                result.Enqueue(new ChessPosition
-                {
-                    Column = col,
-                    Row = row,
-                });
-            }
+					int newRow = chessPiecePosition.Row + rowDelta;
+					int newCol = chessPiecePosition.Column + colDelta;
 
-            // Поля справа
-            for (int col = chessPiecePosition.Column + 1,
-                row = chessPiecePosition.Row + 1;
-                col >= 0 && col < 8 && row < 8; col--)
-            {
-                result.Enqueue(new ChessPosition
-                {
-                    Column = col,
-                    Row = row,
-                });
-            }
+					// Проверяем, что позиция находится в пределах доски
+					if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8)
+					{
+						result.Enqueue(new ChessPosition
+						{
+							Row = newRow,
+							Column = newCol
+						});
+					}
+				}
+			}
 
-            return result.ToArray();
-        }
+			return result.ToArray();
+		}
 
 		string IChessPiece.GetName() => "Король";
 	}

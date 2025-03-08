@@ -32,22 +32,23 @@ namespace ANM_Task_02
 
             Console.Write("Введите исходные данные: ");
 			var parsedInput = Console.ReadLine().ToLower().Split(' ');
+
 			var index = 0;
 			var movingChessPiece = nameChessPiecesDictionary[parsedInput[index++]];
 			movingChessPiece.Position = ChessPosition.FromTheChessAnnotation(parsedInput[index++]);
             var attackingChessPiece = nameChessPiecesDictionary[parsedInput[index++]];
             attackingChessPiece.Position = ChessPosition.FromTheChessAnnotation(parsedInput[index++]);
 			var finalPosition = ChessPosition.FromTheChessAnnotation(parsedInput[index++]);
-			_chessboard[movingChessPiece.Position.Row, movingChessPiece.Position.Column] = chessPieceNumberDictionary[movingChessPiece.GetType()];
-            _chessboard[attackingChessPiece.Position.Row, attackingChessPiece.Position.Column] = chessPieceNumberDictionary[attackingChessPiece.GetType()];
-
-			foreach (var position in attackingChessPiece.GetAttackedPositions(attackingChessPiece.Position))
+            
+			_chessboard[attackingChessPiece.Position.Row, attackingChessPiece.Position.Column] = chessPieceNumberDictionary[attackingChessPiece.GetType()];
+			foreach (var position in attackingChessPiece.GetAttackedPositions(attackingChessPiece.Position, _chessboard))
 			{
 				_chessboard[position.Row, position.Column] -= 1;
             }
+			_chessboard[movingChessPiece.Position.Row, movingChessPiece.Position.Column] = chessPieceNumberDictionary[movingChessPiece.GetType()];
 
 			var resultPath = new Stack<ChessPosition>();
-            if (FindThePath(movingChessPiece.Position, finalPosition, movingChessPiece, resultPath))
+			if (FindThePath(movingChessPiece.Position, finalPosition, movingChessPiece, resultPath))
 			{
 				Console.WriteLine($"{movingChessPiece.GetName()} дойдет до {finalPosition}");
 				Console.Write($"Путь от {movingChessPiece.Position} до {finalPosition}: ");
@@ -60,9 +61,13 @@ namespace ANM_Task_02
 			}
 			else
 			{
-                Console.WriteLine($"{movingChessPiece.GetName()} не дойдет до {finalPosition}");
-            }
-        }
+				Console.WriteLine($"{movingChessPiece.GetName()} не дойдет до {finalPosition}");
+			}
+			Console.WriteLine();
+			Console.WriteLine();
+			ClearChessboard(1);
+			PrintChessboard();
+		}
 
 		private static void PrintChessboard()
 		{
@@ -78,38 +83,53 @@ namespace ANM_Task_02
 				Console.Write($"{row + 1} ");
 				for (var col = 0; col < _chessboard.GetLength(1); col++)
 				{
-					if (((row % 2 == 1 && col % 2 == 0) 
+					if (_chessboard[row, col] <= 0)
+					{
+						if (((row % 2 == 1 && col % 2 == 0)
 						|| (row % 2 == 0 && col % 2 == 1)))
-					{
-						continue;
+						{
+							if (_chessboard[row, col] < 0)
+							{
+								Console.BackgroundColor = ConsoleColor.Red;
+							}
+							Console.Write(' ');
+							Console.BackgroundColor = ConsoleColor.Black;
+
+							continue;
+						}
+
+						if (_chessboard[row, col] < 0)
+						{
+							Console.ForegroundColor = ConsoleColor.Red;
+						}
+						Console.Write('П');
+						Console.ForegroundColor = ConsoleColor.White;
 					}
-
-					switch (_chessboard[row, col])
+					else
 					{
-						case 0:
-							Console.Write('П');
-							break;
+						switch (_chessboard[row, col])
+						{
+							case Bishop.Number:
+								Console.Write('С');
+								break;
 
-						case Bishop.Number:
-                            Console.Write('С');
-                            break;
+							case Castle.Number:
+								Console.Write('Л');
+								break;
 
-                        case Castle.Number:
-                            Console.Write('Л');
-                            break;
+							case King.Number:
+								Console.Write('К');
+								break;
 
-                        case King.Number:
-                            Console.Write('К');
-                            break;
+							case Knight.Number:
+								Console.Write('Г');
+								break;
 
-                        case Knight.Number:
-                            Console.Write('Г');
-                            break;
-
-                        case Queen.Number:
-                            Console.Write('Ф');
-                            break;
-                    }
+							case Queen.Number:
+								Console.Write('Ф');
+								break;
+						}
+					}
 				}
 				Console.Write($" {row + 1}");
 				Console.WriteLine();
@@ -122,22 +142,26 @@ namespace ANM_Task_02
 			Console.WriteLine();
 		}
 
-        private static void ClearChessboard()
+        private static void ClearChessboard(int numberToDelete)
 		{
 			for (var row = 0; row < _chessboard.GetLength(0); row++)
 			{
                 for (var col = 0; col < _chessboard.GetLength(0); col++)
                 {
-					_chessboard[row, col] = 0;
-                }
+					if (_chessboard[row, col] == numberToDelete)
+					{
+						_chessboard[row, col] = 0;
+					}
+				}
             }
 		}
 
         private static bool FindThePath(ChessPosition currentPosition, ChessPosition finalPosition, IChessPiece chessPiece, Stack<ChessPosition> result)
 		{
 			//Рекурсивный случай
-			foreach (var position in chessPiece.GetAttackedPositions(currentPosition)
-				.Where(x => x.Difference(finalPosition) >= currentPosition.Difference(finalPosition)))
+			foreach (var position in chessPiece.GetAttackedPositions(currentPosition, _chessboard)
+				.Where(x => x.Difference(finalPosition) <= currentPosition.Difference(finalPosition))
+				.OrderBy(x => x.Difference(finalPosition)))
 			{
                 //Базовый случай
                 if (RecursiveAlgorithm(position))
@@ -147,8 +171,9 @@ namespace ANM_Task_02
                 //Базовый случай
             }
 
-            foreach (var position in chessPiece.GetAttackedPositions(currentPosition)
-                .Where(x => x.Difference(finalPosition) < currentPosition.Difference(finalPosition)))
+            foreach (var position in chessPiece.GetAttackedPositions(currentPosition, _chessboard)
+                .Where(x => x.Difference(finalPosition) > currentPosition.Difference(finalPosition))
+				.OrderBy(x => x.Difference(finalPosition)))
             {
                 //Базовый случай
                 if (RecursiveAlgorithm(position))

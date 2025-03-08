@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace ANM_Task_02
 {
@@ -36,7 +35,7 @@ namespace ANM_Task_02
 
 		public override string ToString()
 		{
-			return $"{ColumnCharDictionary[Column]}{Row}";
+			return $"{ColumnCharDictionary[Column]}{Row + 1}";
 		}
 
 		/// <summary>
@@ -44,6 +43,7 @@ namespace ANM_Task_02
 		/// </summary>
 		/// <param name="position">позициия с которой происходит сравнение</param>
 		public int Difference(ChessPosition position)
+			// Ошибка в расчётах
 			=> Math.Abs(Row - position.Row) + Math.Abs(Column - position.Column);
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace ANM_Task_02
         public static ChessPosition FromTheChessAnnotation(string position)
 		{
 			var column = CharColumnDictionary[position.ToLower()[0]];
-			var row = int.Parse(position.Substring(1, 1));
+			var row = int.Parse(position.Substring(1, 1)) - 1;
 			return new ChessPosition
 			{
 				Row = row,

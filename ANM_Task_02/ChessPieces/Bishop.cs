@@ -13,62 +13,49 @@ namespace ANM_Task_02.ChessPieces
 
 		string IChessPiece.GetName() => "Слон";
 
-        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition)
+        ChessPosition[] IChessPiece.GetAttackedPositions(ChessPosition chessPiecePosition, int[,] chessboard)
 		{
 			var result = new Queue<ChessPosition>();
 
-			// Поля по главной диагонали
-			var startMainPoss = new ChessPosition
+			// Направления движения слона (4 диагонали)
+			int[,] directions = new int[,]
 			{
-				Column = chessPiecePosition.Column,
-				Row = chessPiecePosition.Row,
-            };
+				{ -1, -1 }, // Вверх-влево
+				{ -1,  1 }, // Вверх-вправо
+				{  1, -1 }, // Вниз-влево
+				{  1,  1 }  // Вниз-вправо
+			};
 
-			while (startMainPoss.Column > 0
-				&& startMainPoss.Row > 0)
+			// Перебираем все направления
+			for (int i = 0; i < directions.GetLength(0); i++)
 			{
-                startMainPoss.Row--;
-				startMainPoss.Column--;
-            }
+				int rowStep = directions[i, 0];
+				int colStep = directions[i, 1];
 
-			for (int row = startMainPoss.Row,
-                col = startMainPoss.Column;
-                row < 8 && col < 8; row++, col++)
-			{
-				if (row != chessPiecePosition.Row)
+				int currentRow = chessPiecePosition.Row + rowStep;
+				int currentCol = chessPiecePosition.Column + colStep;
+
+				// Двигаемся по направлению, пока не выйдем за пределы доски
+				while (currentRow >= 0 && currentRow < 8 && currentCol >= 0 && currentCol < 8)
 				{
-                    result.Enqueue(new ChessPosition
-                    {
-                        Column = col,
-                        Row = row
-                    });
-                }
-			}
+					// Проверяем значение клетки
+					int cellValue = chessboard[currentRow, currentCol];
 
-            // Поля побочной диагонали
-            var startSidePoss = new ChessPosition
-            {
-                Column = chessPiecePosition.Column,
-                Row = chessPiecePosition.Row,
-            };
+					// Если клетка занята фигурой (положительное значение) - останавливаемся
+					if (cellValue > 0)
+						break;
 
-            while (startSidePoss.Column < 8
-                && startSidePoss.Row > 0)
-            {
-                startSidePoss.Row--;
-                startSidePoss.Column++;
-            }
+					// Добавляем позицию в результат (0 или отрицательное значение)
+					result.Enqueue(new ChessPosition
+					{
+						Row = currentRow,
+						Column = currentCol
+					});
 
-            for (int col = startSidePoss.Column, row = startSidePoss.Row; col >= 0 && row < 8; col--, row++)
-			{
-				if (row != chessPiecePosition.Row)
-				{
-                    result.Enqueue(new ChessPosition
-                    {
-                        Column = col,
-                        Row = row
-                    });
-                }
+					// Переходим к следующей клетке
+					currentRow += rowStep;
+					currentCol += colStep;
+				}
 			}
 
 			return result.ToArray();
