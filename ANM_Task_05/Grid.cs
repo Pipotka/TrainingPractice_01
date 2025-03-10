@@ -1,14 +1,17 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace ANM_Task_05
 {
 	internal class Grid
 	{
-		/// <summary>
-		/// Позиция начала верхнего левого региона
-		/// </summary>
-		public static GridPosition UpperLeftRegion { get; } = new GridPosition { Row = 0, Column = 0 };
+        private static readonly Random random = new Random();
+
+        /// <summary>
+        /// Позиция начала верхнего левого региона
+        /// </summary>
+        public static GridPosition UpperLeftRegion { get; } = new GridPosition { Row = 0, Column = 0 };
 
 		/// <summary>
 		/// Позиция начала верхнего центрального региона
@@ -53,17 +56,109 @@ namespace ANM_Task_05
 		/// <summary>
 		/// Игравое поле 9x9
 		/// </summary>
-		public int[,] PlayingField { get; } = new int[9, 9];
+		public int[,] PlayingField { get; private set; } = new int[9, 9];
 
-		public Grid()
+		public void GenerateBaseGrid()
 		{
-			for (var row = 0; row < PlayingField.GetLength(0); row++)
-			{
-				for (var col = 0; col < PlayingField.GetLength(1); col++)
-				{
+            int n = 3; // Размер подквадрата (3x3)
+            int size = n * n; // Размер таблицы (9x9)
 
-				}
-			}
-		}
-	}
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    // Формула для генерации чисел от 1 до 9
+                    PlayingField[i, j] = (i * n + i / n + j) % size + 1;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Транспонирование таблицы (строки становятся столбцами, а столбцы — строками)
+        /// </summary>
+        private void Transpose()
+        {
+            int size = PlayingField.GetLength(0);
+            int[,] transposed = new int[size, size];
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    transposed[j, i] = PlayingField[i, j];
+                }
+            }
+
+            PlayingField = transposed;
+        }
+
+        /// <summary>
+        /// Обмен двух строк в пределах одного района
+        /// </summary>
+        private void SwapRowsSmall()
+        {
+            int n = 3; // Размер подквадрата (3x3)
+            int area = random.Next(0, n); // Случайный выбор района (0, 1 или 2)
+            int line1 = random.Next(0, n); // Случайный выбор первой строки в районе
+            int N1 = area * n + line1; // Номер первой строки для обмена
+
+            int line2 = random.Next(0, n); // Случайный выбор второй строки в районе
+            while (line1 == line2)
+            {
+                line2 = random.Next(0, n); // Убедимся, что строки разные
+            }
+            int N2 = area * n + line2; // Номер второй строки для обмена
+
+            // Обмен строк
+            for (int j = 0; j < PlayingField.GetLength(1); j++)
+            {
+                int temp = PlayingField[N1, j];
+                PlayingField[N1, j] = PlayingField[N2, j];
+                PlayingField[N2, j] = temp;
+            }
+        }
+
+        /// <summary>
+        /// Обмен двух столбцов в пределах одного района
+        /// </summary>
+        private void SwapColumnsSmall()
+        {
+            Transpose(); // Транспонируем таблицу (столбцы становятся строками)
+            SwapRowsSmall(); // Обмениваем строки (бывшие столбцы)
+            Transpose(); // Транспонируем обратно (строки снова становятся столбцами)
+        }
+
+        /// <summary>
+        /// Обмен двух районов по горизонтали
+        /// </summary>
+        private void SwapRowsArea()
+        {
+            int n = 3; // Размер подквадрата (3x3)
+            int area1 = random.Next(0, n); // Случайный выбор первого района
+            int area2 = random.Next(0, n); // Случайный выбор второго района
+
+            // Убедимся, что районы разные
+            while (area1 == area2)
+            {
+                area2 = random.Next(0, n);
+            }
+
+            // Обмен всех строк между двумя районами
+            for (int i = 0; i < n; i++)
+            {
+                int N1 = area1 * n + i; // Номер строки в первом районе
+                int N2 = area2 * n + i; // Номер строки во втором районе
+
+                // Обмен строк
+                for (int j = 0; j < PlayingField.GetLength(1); j++)
+                {
+                    int temp = PlayingField[N1, j];
+                    PlayingField[N1, j] = PlayingField[N2, j];
+                    PlayingField[N2, j] = temp;
+                }
+            }
+        }
+
+
+    }
 }

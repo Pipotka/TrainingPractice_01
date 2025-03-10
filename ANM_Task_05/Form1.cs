@@ -15,7 +15,20 @@ namespace ANM_Task_05
 		public Form1()
 		{
 			InitializeComponent();
-			this.FindForm
+			var grid = new Grid();
+			grid.GenerateBaseGrid();
+			for (int row = 0; row < 9; row++)
+			{
+				for (int col = 0; col < 9; col++)
+				{
+					var name = $"tB{row}{col}";
+					var control = Controls.Find(name, true).FirstOrDefault();
+					if (control != null && control is TextBox tb)
+					{
+						tb.Text = grid.PlayingField[row, col].ToString();
+                    }
+				}
+			}
 		}
 
 		private void TextBox_KeyPress(object sender, KeyPressEventArgs e)
