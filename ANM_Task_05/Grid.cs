@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace ANM_Task_05
 {
 	internal class Grid
 	{
         private static readonly Random random = new Random();
+		private const int N = 3;
+		private const int Size = 9;
 
-        /// <summary>
-        /// Позиция начала верхнего левого региона
-        /// </summary>
-        public static GridPosition UpperLeftRegion { get; } = new GridPosition { Row = 0, Column = 0 };
+		/// <summary>
+		/// Позиция начала верхнего левого региона
+		/// </summary>
+		public static GridPosition UpperLeftRegion { get; } = new GridPosition { Row = 0, Column = 0 };
 
 		/// <summary>
 		/// Позиция начала верхнего центрального региона
@@ -56,7 +57,7 @@ namespace ANM_Task_05
 		/// <summary>
 		/// Игравое поле 9x9
 		/// </summary>
-		public int[,] PlayingField { get; private set; } = new int[9, 9];
+		public int[,] PlayingField { get; set; } = new int[9, 9];
 
 		public void GenerateBaseGrid()
 		{
@@ -159,6 +160,206 @@ namespace ANM_Task_05
             }
         }
 
+		/// <summary>
+		/// Обмен двух районов по вертикали
+		/// </summary>
+		private void SwapColumnsArea()
+		{
+			Transpose(); // Транспонируем таблицу (столбцы становятся строками)
+			SwapRowsArea(); // Обмениваем районы по горизонтали (бывшие столбцы)
+			Transpose(); // Транспонируем обратно (строки снова становятся столбцами)
+		}
 
-    }
+		/// <summary>
+		/// Случайное перемешивание таблицы
+		/// </summary>
+		/// <param name="amt">Количество перемешиваний</param>
+		public void Mix(int amt = 10)
+		{
+			// Список функций для перемешивания
+			var mixFunctions = new List<Action>
+		    {
+			    Transpose,
+			    SwapRowsSmall,
+			    SwapColumnsSmall,
+			    SwapRowsArea,
+			    SwapColumnsArea
+		    };
+
+			// Случайное применение функций перемешивания
+			for (int i = 0; i < amt; i++)
+			{
+				int idFunc = random.Next(0, mixFunctions.Count); // Случайный выбор функции
+				mixFunctions[idFunc](); // Вызов выбранной функции
+			}
+		}
+
+		/// <summary>
+		/// Подготовка таблицы к игре в зависимости от уровня сложности
+		/// </summary>
+		/// <param name="difficulty">Уровень сложности</param>
+		public void PrepareToPlay(DifficultyLevel difficulty)
+		{
+			var targetClues = 30;
+
+			switch (difficulty)
+			{
+				case DifficultyLevel.Easy:
+					targetClues = (int)(Size * Size * 0.45);
+					break;
+
+				case DifficultyLevel.Medium:
+					targetClues = (int)(Size * Size * 0.35);
+					break;
+
+				case DifficultyLevel.Hard:
+					targetClues = (int)(Size * Size * 0.25);
+					break;
+			}
+			int maxIterations = 5; // Максимум 5 проходов по всем ячейкам
+			int removed = 0;
+
+			for (int iter = 0; iter < maxIterations; iter++)
+			{
+				var candidates = GenerateShuffledCells();
+				bool changed = false;
+
+				foreach (var (i, j) in candidates)
+				{
+					if (CountClues() <= targetClues) break;
+					if (PlayingField[i, j] == 0) continue;
+
+					int original = PlayingField[i, j];
+					PlayingField[i, j] = 0;
+
+					if (CountSolutionsFast() == 1)
+					{
+						removed++;
+						changed = true;
+					}
+					else
+					{
+						PlayingField[i, j] = original;
+					}
+				}
+
+				if (!changed) break; // Выход если не было изменений
+			}
+		}
+
+		private List<(int i, int j)> GenerateShuffledCells()
+		{
+			var cells = new List<(int, int)>();
+			for (int i = 0; i < Size; i++)
+				for (int j = 0; j < Size; j++)
+					cells.Add((i, j));
+
+			// Фишер-Йейтс shuffle
+			for (int i = cells.Count - 1; i > 0; i--)
+			{
+				int j = random.Next(i + 1);
+				(cells[i], cells[j]) = (cells[j], cells[i]);
+			}
+			return cells;
+		}
+
+		private int CountClues()
+		{
+			int count = 0;
+			for (int i = 0; i < Size; i++)
+				for (int j = 0; j < Size; j++)
+					if (PlayingField[i, j] != 0) count++;
+			return count;
+		}
+
+		private int CountSolutionsFast()
+		{
+			int[,] tempGrid = (int[,])PlayingField.Clone();
+			int solutionCount = 0;
+			SolveRecursive(tempGrid, ref solutionCount);
+			return solutionCount;
+		}
+
+		private bool SolveRecursive(int[,] grid, ref int count)
+		{
+			for (int row = 0; row < Size; row++)
+			{
+				for (int col = 0; col < Size; col++)
+				{
+					if (grid[row, col] != 0) continue;
+
+					Span<int> available = stackalloc int[Size];
+					GetAvailableNumbers(grid, row, col, available);
+
+					foreach (int num in available)
+					{
+						if (num == 0) break;
+
+						if (IsValidPlacement(grid, row, col, num))
+						{
+							grid[row, col] = num;
+							if (SolveRecursive(grid, ref count))
+							{
+								// Обнаружено более одного решения
+								grid[row, col] = 0;
+								return true;
+							}
+							grid[row, col] = 0;
+						}
+					}
+					return false;
+				}
+			}
+			count++;
+			return count > 1;
+		}
+
+		private void GetAvailableNumbers(int[,] grid, int row, int col, Span<int> buffer)
+		{
+			bool[] used = new bool[Size + 1];
+
+			// Проверяем строку и столбец
+			for (int i = 0; i < Size; i++)
+			{
+				used[grid[row, i]] = true;
+				used[grid[i, col]] = true;
+			}
+
+			// Проверяем регион 3x3
+			int startRow = row / N * N;
+			int startCol = col / N * N;
+			for (int i = 0; i < N; i++)
+				for (int j = 0; j < N; j++)
+					used[grid[startRow + i, startCol + j]] = true;
+
+			int index = 0;
+			for (int num = 1; num <= Size; num++)
+				if (!used[num]) buffer[index++] = num;
+
+			// Заполняем оставшиеся нулями
+			while (index < Size) buffer[index++] = 0;
+		}
+
+		private bool IsValidPlacement(int[,] grid, int row, int col, int num)
+		{
+			// Проверка строки и столбца
+			for (int i = 0; i < Size; i++)
+			{
+				if (grid[row, i] == num) return false;
+				if (grid[i, col] == num) return false;
+			}
+
+			// Проверка региона 3x3
+			int startRow = row / N * N;
+			int startCol = col / N * N;
+			for (int i = 0; i < N; i++)
+				for (int j = 0; j < N; j++)
+					if (grid[startRow + i, startCol + j] == num)
+						return false;
+
+			return true;
+		}
+
+		
+	}
 }
