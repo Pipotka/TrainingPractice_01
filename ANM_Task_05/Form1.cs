@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -8,25 +9,40 @@ namespace ANM_Task_05
 {
 	public partial class Form1 : Form
 	{
-		private Grid completedGrid = new Grid();
-		private Grid userGrid = new Grid();
+		private Grid userGrid;
+		private Grid UserGrid
+		{
+			get => userGrid;
+			set
+			{
+				userGrid = value;
+				positionRedCells.Clear();
+				positionGreenCells.Clear();
+				DrawGrid(userGrid);
+				mainTableLayoutPanel.Refresh();
+			}
+		}
 		private Dictionary<GridPosition, List<GridPosition>> positionRedCells;
 		private Dictionary<GridPosition, List<GridPosition>> positionGreenCells;
-		private bool isLoadMap = false;
 		private DifficultyLevel difficultyLevel = DifficultyLevel.Easy;
-
+		private Dictionary<DifficultyLevel, string> DifficultyLevelGrids;
+		private Color controlColor = Color.FromArgb(255, 240, 240, 240);
 		public Form1()
 		{
 			InitializeComponent();
             positionRedCells = new Dictionary<GridPosition, List<GridPosition>>();
             positionGreenCells = new Dictionary<GridPosition, List<GridPosition>>();
+			var mapsDirect = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)));
+
+			DifficultyLevelGrids = new Dictionary<DifficultyLevel, string>()
+			{
+				{DifficultyLevel.Easy, Path.Combine(mapsDirect, "EasyGrid.txt") },
+				{DifficultyLevel.Medium, Path.Combine(mapsDirect, "MediumGrid.txt") },
+				{DifficultyLevel.Hard, Path.Combine(mapsDirect, "HardGrid.txt") },
+			};
 
 			difficultyLevelComboBox.DataSource = Enum.GetValues(typeof(DifficultyLevel));
-            completedGrid.GenerateBaseGrid();
-			completedGrid.Mix(new Random().Next(10, 31));
-			userGrid.PlayingField = (int[,])completedGrid.PlayingField.Clone();
-			userGrid.PrepareToPlay(difficultyLevel);
-			DrawGrid(userGrid);
+			UserGrid = Grid.FromFile(DifficultyLevelGrids[difficultyLevel]);
 		}
 
 		private void TextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -40,7 +56,12 @@ namespace ANM_Task_05
 					var position = new GridPosition(int.Parse(tb.Name[tb.Name.Length - 2].ToString()),
 						int.Parse(tb.Name[tb.Name.Length - 1].ToString()));
 
-					userGrid.PlayingField[position.Row, position.Column] = value;
+					UserGrid.PlayingField[position.Row, position.Column] = value;
+
+					if (tb.BackColor == Color.Red)
+					{
+						tb.BackColor = controlColor;
+					}
 
                     List<GridPosition> oldRed = null;
                     List<GridPosition> oldGreen = null;
@@ -48,13 +69,20 @@ namespace ANM_Task_05
                     positionRedCells.TryGetValue(position, out oldRed);
                     positionGreenCells.TryGetValue(position, out oldGreen);
 
-                    if (oldRed != null) PaintCells(oldRed, Color.White);
-                    if (oldGreen != null) PaintCells(oldGreen, Color.White);
+					if (oldRed != null) 
+					{
+						PaintCells(oldRed, controlColor);
+					}
 
-                    positionRedCells.Remove(position);
+					if (oldGreen != null)
+					{
+						PaintCells(oldGreen, controlColor);
+					}
+
+					positionRedCells.Remove(position);
                     positionGreenCells.Remove(position);
 
-                    ValidateMove(position, userGrid.PlayingField,
+                    ValidateMove(position, UserGrid.PlayingField,
                         out var newRed,
                         out var newGreen);
 
@@ -79,60 +107,38 @@ namespace ANM_Task_05
 			{
 				try
 				{
-                    completedGrid = Grid.FromFile(openFileDialog1.FileName);
+                    UserGrid = Grid.FromFile(openFileDialog1.FileName);
+					difficultyLevelComboBox.Enabled = false;
                 }
 				catch (Exception ex)
 				{
 					MessageBox.Show(ex.Message, "Ошибка");
 					return;
 				}
-                userGrid.PlayingField = (int[,])completedGrid.PlayingField.Clone();
-                userGrid.PrepareToPlay(difficultyLevel);
-                DrawGrid(userGrid);
             }
 		}
 
         private void checkButton_Click(object sender, EventArgs e)
         {
-            if (!isLoadMap)
+			for (var row = 0; row < UserGrid.PlayingField.GetLength(0); row++)
 			{
-                for (var row = 0; row < userGrid.PlayingField.GetLength(0); row++)
-                {
-                    for (var col = 0; col < userGrid.PlayingField.GetLength(1); col++)
-                    {
-                        var position = new GridPosition(row, col);
-                        if (userGrid.PlayingField[row, col]  != completedGrid.PlayingField[row, col])
-                        {
-                            MessageBox.Show("Неправильно!");
-                            return;
-                        }
-                    }
-                }
-            }
-			else
-			{
-                for (var row = 0; row < userGrid.PlayingField.GetLength(0); row++)
+				for (var col = 0; col < UserGrid.PlayingField.GetLength(1); col++)
 				{
-					for (var col = 0; col < userGrid.PlayingField.GetLength(1); col++)
+					var position = new GridPosition(row, col);
+					if (!ValidateMove(position, UserGrid.PlayingField, out var red, out var green))
 					{
-						var position = new GridPosition(row, col);
-						if (!ValidateMove(position, userGrid.PlayingField, out var red, out var green))
-						{
-                            MessageBox.Show("Неправильно!");
-                            return;
-                        }
+						MessageBox.Show("Неправильно!");
+						return;
 					}
 				}
-            }
-            MessageBox.Show("Всё верно!");
+			}
+			MessageBox.Show("Всё верно!");
         }
 
         private void difficultyLevelComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 			difficultyLevel = (DifficultyLevel)difficultyLevelComboBox.SelectedValue;
-            userGrid.PlayingField = (int[,])completedGrid.PlayingField.Clone();
-            userGrid.PrepareToPlay(difficultyLevel);
-            DrawGrid(userGrid);
+			UserGrid = Grid.FromFile(DifficultyLevelGrids[difficultyLevel]);
         }
 
         private void PaintCells(ICollection<GridPosition> cells, Color color)
@@ -195,6 +201,7 @@ namespace ANM_Task_05
                     if (control != null && control is TextBox tb)
                     {
                         tb.Text = string.Empty;
+						tb.BackColor = controlColor;
                         tb.Enabled = true;
                         tb.Invalidate();
                     }

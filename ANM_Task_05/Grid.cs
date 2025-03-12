@@ -17,7 +17,7 @@ namespace ANM_Task_05
 
 		public void GenerateBaseGrid()
 		{
-            int n = 3; // Размер подквадрата (3x3)
+			int n = 3; // Размер подквадрата (3x3)
             int size = n * n; // Размер таблицы (9x9)
 
             for (int i = 0; i < size; i++)
