@@ -119,6 +119,10 @@
             this.tB02 = new System.Windows.Forms.TextBox();
             this.tB01 = new System.Windows.Forms.TextBox();
             this.tB00 = new System.Windows.Forms.TextBox();
+            this.fromFileButton = new System.Windows.Forms.Button();
+            this.checkButton = new System.Windows.Forms.Button();
+            this.difficultyLevelComboBox = new System.Windows.Forms.ComboBox();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.mainTableLayoutPanel.SuspendLayout();
             this.tLP8.SuspendLayout();
             this.tLP7.SuspendLayout();
@@ -147,7 +151,6 @@
             this.mainTableLayoutPanel.Controls.Add(this.tLP2, 2, 0);
             this.mainTableLayoutPanel.Controls.Add(this.tLP1, 1, 0);
             this.mainTableLayoutPanel.Controls.Add(this.tLP0, 0, 0);
-            this.mainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.mainTableLayoutPanel.Name = "mainTableLayoutPanel";
             this.mainTableLayoutPanel.RowCount = 3;
@@ -1518,14 +1521,50 @@
             this.tB00.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tB00.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox_KeyPress);
             // 
+            // fromFileButton
+            // 
+            this.fromFileButton.Location = new System.Drawing.Point(710, 40);
+            this.fromFileButton.Name = "fromFileButton";
+            this.fromFileButton.Size = new System.Drawing.Size(108, 23);
+            this.fromFileButton.TabIndex = 1;
+            this.fromFileButton.Text = "Из файла";
+            this.fromFileButton.UseVisualStyleBackColor = true;
+            this.fromFileButton.Click += new System.EventHandler(this.fromFileButton_Click);
+            // 
+            // checkButton
+            // 
+            this.checkButton.Location = new System.Drawing.Point(710, 84);
+            this.checkButton.Name = "checkButton";
+            this.checkButton.Size = new System.Drawing.Size(108, 23);
+            this.checkButton.TabIndex = 2;
+            this.checkButton.Text = "Проверить";
+            this.checkButton.UseVisualStyleBackColor = true;
+            this.checkButton.Click += new System.EventHandler(this.checkButton_Click);
+            // 
+            // difficultyLevelComboBox
+            // 
+            this.difficultyLevelComboBox.FormattingEnabled = true;
+            this.difficultyLevelComboBox.Location = new System.Drawing.Point(710, 127);
+            this.difficultyLevelComboBox.Name = "difficultyLevelComboBox";
+            this.difficultyLevelComboBox.Size = new System.Drawing.Size(108, 21);
+            this.difficultyLevelComboBox.TabIndex = 3;
+            this.difficultyLevelComboBox.SelectedIndexChanged += new System.EventHandler(this.difficultyLevelComboBox_SelectedIndexChanged);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Текстовые файлы|*.txt";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(704, 504);
+            this.ClientSize = new System.Drawing.Size(825, 504);
+            this.Controls.Add(this.difficultyLevelComboBox);
+            this.Controls.Add(this.checkButton);
+            this.Controls.Add(this.fromFileButton);
             this.Controls.Add(this.mainTableLayoutPanel);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(720, 543);
             this.MinimumSize = new System.Drawing.Size(720, 543);
             this.Name = "Form1";
             this.Text = "Судоку";
@@ -1645,6 +1684,10 @@
 		private System.Windows.Forms.TextBox tB05;
 		private System.Windows.Forms.TextBox tB04;
 		private System.Windows.Forms.TextBox tB03;
-	}
+        private System.Windows.Forms.Button fromFileButton;
+        private System.Windows.Forms.Button checkButton;
+        private System.Windows.Forms.ComboBox difficultyLevelComboBox;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+    }
 }
 

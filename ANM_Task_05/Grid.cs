@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ANM_Task_05
 {
@@ -8,51 +9,6 @@ namespace ANM_Task_05
         private static readonly Random random = new Random();
 		private const int N = 3;
 		private const int Size = 9;
-
-		/// <summary>
-		/// Позиция начала верхнего левого региона
-		/// </summary>
-		public static GridPosition UpperLeftRegion { get; } = new GridPosition { Row = 0, Column = 0 };
-
-		/// <summary>
-		/// Позиция начала верхнего центрального региона
-		/// </summary>
-		public static GridPosition UpperCentralRegion { get; } = new GridPosition { Row = 0, Column = 3 };
-
-		/// <summary>
-		/// Позиция начала верхнего правого региона
-		/// </summary>
-		public static GridPosition UpperRightRegion { get; } = new GridPosition { Row = 0, Column = 6 };
-
-		/// <summary>
-		/// Позиция начала среднего левого региона
-		/// </summary>
-		public static GridPosition MiddleLeftRegion { get; } = new GridPosition { Row = 3, Column = 0 };
-
-		/// <summary>
-		/// Позиция начала среднего центрального региона
-		/// </summary>
-		public static GridPosition MiddleCentralRegion { get; } = new GridPosition { Row = 3, Column = 3 };
-
-		/// <summary>
-		/// Позиция начала среднего правого региона
-		/// </summary>
-		public static GridPosition MiddleRightRegion { get; } = new GridPosition { Row = 3, Column = 6 };
-
-		/// <summary>
-		/// Позиция начала нижнего левого региона
-		/// </summary>
-		public static GridPosition LowerLeftRegion { get; } = new GridPosition { Row = 6, Column = 0 };
-
-		/// <summary>
-		/// Позиция начала нижнего центрального региона
-		/// </summary>
-		public static GridPosition LowerCentralRegion { get; } = new GridPosition { Row = 6, Column = 3 };
-
-		/// <summary>
-		/// Позиция начала нижнего правого региона
-		/// </summary>
-		public static GridPosition LowerRightRegion { get; } = new GridPosition { Row = 6, Column = 6 };
 
 		/// <summary>
 		/// Игравое поле 9x9
@@ -73,6 +29,33 @@ namespace ANM_Task_05
                 }
             }
         }
+
+		public static Grid FromFile(string fileName)
+		{
+			var grid = new int[9, 9];
+			var lines = File.ReadAllLines(fileName);
+			if (lines.Length != 9)
+			{
+				throw new Exception("Размер поля должен быть 9 на 9");
+			}
+			for (var i = 0; i < lines.Length; i++)
+			{
+				if (lines[i].Length != 9)
+				{
+                    throw new Exception("Размер поля должен быть 9 на 9");
+                }
+
+				for (var j = 0; j < lines[i].Length; j++)
+				{
+					if (!char.IsDigit(lines[i][j]))
+					{
+                        throw new Exception("Поле должно содержать только цифры");
+                    }
+					grid[i, j] = int.Parse(lines[i][j].ToString());
+				}
+			}
+			return new Grid {PlayingField = grid };
+		}
 
         /// <summary>
         /// Транспонирование таблицы (строки становятся столбцами, а столбцы — строками)
